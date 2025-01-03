@@ -1,11 +1,26 @@
 # Databricks notebook source
 # MAGIC %md
-# MAGIC **Uploaded credentials file for AWS user employee to FileStore via Legacy option in Databrick UI**. <br>
+# MAGIC # Mount S3 Bucket Securely to Databricks
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC **Uploaded credentials file for AWS user employee to FileStore via Legacy option in Databricks UI**. <br>
 # MAGIC **This will allow me to access the S3 bucket (once mounted to dbfs) from Databricks in a secure manner**
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC ## Verify that AWS credentials file is successfully loaded into Databricks FileStore
+
+# COMMAND ----------
+
 dbutils.fs.ls("/FileStore/tables")
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Load Credentials into a Spark Dataframe
 
 # COMMAND ----------
 
@@ -28,6 +43,11 @@ df_aws_cred = spark.read.format(file_type) \
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC ## Get Access Keys from Spark Dataframe
+
+# COMMAND ----------
+
 # get aws access keys from the spark dataframe
 ACCESS_KEY = df_aws_cred.select("Access key ID").collect()[0]['Access key ID']
 SECRET_KEY = df_aws_cred.select("Secret access key").collect()[0]['Secret access key']
@@ -36,18 +56,29 @@ ENCODED_SECRET_KEY = urllib.parse.quote(string=SECRET_KEY, safe='')
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC ## Mount the bucket to DBFS
+# MAGIC **If bucket is already mounted, unmount it and remount it.**
+
+# COMMAND ----------
+
 # mount the aws bucket to the dbfs
 AWS_S3_BUCKET = "covid-data-gerald"
 # mount name for the bucket
 MOUNT_NAME = "/mnt/covid-data-gerald"
 # source url
-SOURCE_URL = "s3n://{0}:{1}@{2}".format(ACCESS_KEY,SECRET_KEY,AWS_S3_BUCKET)
+SOURCE_URL = "s3n://{}:{}@{}".format(ACCESS_KEY, SECRET_KEY, AWS_S3_BUCKET)
+
+# Check if the mount point already exists
+if any(mount.mountPoint == MOUNT_NAME for mount in dbutils.fs.mounts()):
+    dbutils.fs.unmount(MOUNT_NAME)
+
 # mount the drive
 dbutils.fs.mount(SOURCE_URL, MOUNT_NAME)
 
 # COMMAND ----------
 
-# MAGIC %md **Verify that files are available in the mounted directory**
+# MAGIC %md ## Verify that files are available in the mounted directory
 
 # COMMAND ----------
 
