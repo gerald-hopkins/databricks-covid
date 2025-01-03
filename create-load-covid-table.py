@@ -5,7 +5,7 @@
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Create and Load the raw delta table
+# MAGIC ## Load data from mounted file into dataframe
 
 # COMMAND ----------
 
@@ -23,6 +23,11 @@ df = spark.read.format(file_type) \
     .option("sep", delimiter) \
     .load(file_location)
 display(df)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Create and load raw delta table *covid_vaccine_statewise*
 
 # COMMAND ----------
 
@@ -47,6 +52,11 @@ display(df)
 #       .withColumnRenamed("Total Doses Administered", "TotalDosesAdministered")
 
 df.write.mode("overwrite").saveAsTable("covid_vaccine_statewise")
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Verify records loaded into raw delta table *covid_vaccine_statewise*
 
 # COMMAND ----------
 
