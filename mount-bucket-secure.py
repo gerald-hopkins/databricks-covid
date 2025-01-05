@@ -78,8 +78,38 @@ dbutils.fs.mount(SOURCE_URL, MOUNT_NAME)
 
 # COMMAND ----------
 
-# MAGIC %md ## Verify that files are available in the mounted directory
+# MAGIC %md ## Verify that files are available in the mount directory
 
 # COMMAND ----------
 
 # MAGIC %fs ls "/mnt/covid-data-gerald"
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Mount another bucket to DBFS
+
+# COMMAND ----------
+
+# mount the aws bucket to the dbfs
+AWS_S3_BUCKET = "databricks-tcph"
+# mount name for the bucket
+MOUNT_NAME = "/mnt/databricks-tcph"
+# source url
+SOURCE_URL = "s3n://{}:{}@{}".format(ACCESS_KEY, SECRET_KEY, AWS_S3_BUCKET)
+
+# Check if the mount point already exists
+if any(mount.mountPoint == MOUNT_NAME for mount in dbutils.fs.mounts()):
+    dbutils.fs.unmount(MOUNT_NAME)
+
+# mount the drive
+dbutils.fs.mount(SOURCE_URL, MOUNT_NAME)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Verify that files are avaialable in the mount directory
+
+# COMMAND ----------
+
+# MAGIC %fs ls "/mnt/databricks-tcph"
